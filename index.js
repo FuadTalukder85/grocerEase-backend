@@ -8,7 +8,7 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = process.env.MONGODB_URI;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -26,19 +26,34 @@ async function run() {
     await client.connect();
 
     const db = client.db("GrocerEase");
-    const AllProductCollection = db.collection("products");
+    const allProductCollection = db.collection("products");
 
     //post product
     app.post("/create-product", async (req, res) => {
       const addProducts = req.body;
-      const result = await AllProductCollection.insertOne(addProducts);
+      const result = await allProductCollection.insertOne(addProducts);
       res.send(result);
     });
 
     //get all product
     app.get("/all-product", async (req, res) => {
-      const result = await AllProductCollection.find().toArray();
+      const result = await allProductCollection.find().toArray();
       res.send(result);
+    });
+
+    app.get("/all-product/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await allProductCollection.findOne(query);
+      res.send(result);
+    });
+
+    //get all state
+    app.get("/all-stats", async (req, res) => {
+      const totalProducts = await allProductCollection.estimatedDocumentCount();
+      res.send({
+        totalProducts,
+      });
     });
 
     // Send a ping to confirm a successful connection
