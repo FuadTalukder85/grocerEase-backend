@@ -15,8 +15,8 @@ const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
+    strict: false,
+    deprecationErrors: false,
   },
 });
 
@@ -27,6 +27,7 @@ async function run() {
 
     const db = client.db("GrocerEase");
     const allProductCollection = db.collection("products");
+    const allCategoryCollection = db.collection("category");
 
     //post product
     app.post("/create-product", async (req, res) => {
@@ -38,6 +39,12 @@ async function run() {
     //get all product
     app.get("/all-product", async (req, res) => {
       const result = await allProductCollection.find().toArray();
+      res.send(result);
+    });
+
+    //get all category
+    app.get("/all-category", async (req, res) => {
+      const result = await allCategoryCollection.find().toArray();
       res.send(result);
     });
 
