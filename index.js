@@ -68,17 +68,16 @@ async function run() {
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
+    app.get("/", (req, res) => {
+      res.send("grocerease server is running");
+    });
+
+    app.listen(port, () => {
+      console.log(`grocerease server is running on port ${port}`);
+    });
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
   }
 }
 run().catch(console.dir);
-
-app.get("/", (req, res) => {
-  res.send("grocerease server is running");
-});
-
-app.listen(port, () => {
-  console.log(`grocerease server is running on port ${port}`);
-});
