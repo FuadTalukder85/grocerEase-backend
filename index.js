@@ -26,8 +26,51 @@ async function run() {
     await client.connect();
 
     const db = client.db("GrocerEase");
+    const usersCollection = db.collection("users");
     const allProductCollection = db.collection("products");
     const allCategoryCollection = db.collection("category");
+
+    // Register user
+    app.post("api/v1/register", async (req, res) => {
+      const { firstName, lastName, email, password } = req.body;
+
+      const existingUser = await usersCollection.findOne({ email });
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: "User already exists",
+        });
+      }
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      await usersCollection.insertOne({
+        firstName,
+        lastName,
+        email,
+        password: hashedPassword,
+      });
+      res.status(201).json({
+        success: true,
+        message: "User register successfully",
+      });
+    });
+
+    // Login user
+    app.post("/api/v1/login", async (req, res) => {
+      const { email, password } = req.body;
+      const user = await usersCollection.findOne({ email });
+      if (!user) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+      const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, {
+        expiresIn: process.env.EXPIRES_IN,
+      });
+      res.json({ success: true, message: "Login successfully", token });
+    });
 
     //post product
     app.post("/create-product", async (req, res) => {
