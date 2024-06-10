@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
+const bcrypt = require("bcrypt");
 require("dotenv").config();
+const jwt = require("jsonwebtoken");
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -31,7 +33,7 @@ async function run() {
     const allCategoryCollection = db.collection("category");
 
     // Register user
-    app.post("api/v1/register", async (req, res) => {
+    app.post("/api/v1/register", async (req, res) => {
       const { firstName, lastName, email, password } = req.body;
 
       const existingUser = await usersCollection.findOne({ email });
